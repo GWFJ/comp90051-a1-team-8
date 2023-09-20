@@ -1,1 +1,42 @@
+###Applying resampling on domain2:
 
+
+X = padd_tokens(domain2_df['text']) 
+y = domain2_df['label'] 
+
+pca = PCA(n_components=2) 
+X_vis = pca.fit_transform(X) 
+
+# Initialize SMOTE instances
+
+smote_regular = SMOTE() 
+smote_borderline1 = SMOTE() 
+smote_borderline2 = SMOTE() 
+smote_svm = SMOTE() 
+
+
+# Perform resampling with different SMOTE methods 
+
+X_resampled_regular, y_resampled_regular = smote_regular.fit_resample(X, y) 
+X_resampled_borderline1, y_resampled_borderline1 = smote_borderline1.fit_resample(X, y)
+X_resampled_borderline2, y_resampled_borderline2 = smote_borderline2.fit_resample(X, y)
+X_resampled_svm, y_resampled_svm = smote_svm.fit_resample(X, y) 
+
+# Apply SMOTE+ENN 
+
+sm = SMOTEENN() 
+
+X_SENN, y_SENN = sm.fit_resample(X, y) 
+X_SENN_vis = pca.transform(X_SENN) 
+############################################################################
+
+# Plot graphs 
+
+f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2) 
+c0, c1 = plot_resampling(ax1, X_vis, y, 'Original set') 
+plot_resampling(ax2, pca.transform(X_resampled_regular), y_resampled_regular, 'SMOTE (Regular)') 
+plot_resampling(ax3, X_SENN_vis, y_SENN, 'SMOTE + ENN')
+plot_resampling(ax4, pca.transform(X_resampled_borderline1), y_resampled_borderline1, 'SMOTE (Borderline1)') 
+f.legend((c0, c1), ('Machine-generated #0', 'Human-generated #1'), loc='lower center', ncol=2, labelspacing = 0.) 
+plt.tight_layout() 
+plt.show() 
